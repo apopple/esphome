@@ -9,6 +9,8 @@
 #include "esphome/core/helpers.h"
 #include "mqtt_backend.h"
 
+#include "esp_tls.h"
+
 namespace esphome {
 namespace mqtt {
 
@@ -47,6 +49,7 @@ class MQTTBackendESP32 final : public MQTTBackend {
 
   void set_keep_alive(uint16_t keep_alive) final { this->keep_alive_ = keep_alive; }
   void set_client_id(const char *client_id) final { this->client_id_ = client_id; }
+  void set_tls_psk(const psk_hint_key_t * psk_hint_key) final { this->psk_hint_key_ = psk_hint_key; }
   void set_clean_session(bool clean_session) final { this->clean_session_ = clean_session; }
 
   void set_credentials(const char *username, const char *password) final {
@@ -153,6 +156,7 @@ class MQTTBackendESP32 final : public MQTTBackend {
   uint8_t lwt_qos_;
   bool lwt_retain_;
   std::string client_id_;
+  const psk_hint_key_t *psk_hint_key_;
   uint16_t keep_alive_;
   bool clean_session_;
   optional<std::string> ca_certificate_;

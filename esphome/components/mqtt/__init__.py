@@ -58,6 +58,8 @@ AUTO_LOAD = ["json"]
 
 CONF_IDF_SEND_ASYNC = "idf_send_async"
 CONF_SKIP_CERT_CN_CHECK = "skip_cert_cn_check"
+CONF_TLS_PSK = "tls_psk"
+CONF_TLS_PSK_HINT = "tls_psk_hint"
 
 
 def validate_message_just_topic(value):
@@ -196,6 +198,8 @@ CONFIG_SCHEMA = cv.All(
             cv.Optional(CONF_USERNAME, default=""): cv.string,
             cv.Optional(CONF_PASSWORD, default=""): cv.string,
             cv.Optional(CONF_CLIENT_ID): cv.string,
+            cv.Optional(CONF_TLS_PSK): cv.All(cv.string, cv.only_with_esp_idf),
+            cv.Optional(CONF_TLS_PSK_HINT): cv.All(cv.string, cv.only_with_esp_idf),
             cv.SplitDefault(CONF_IDF_SEND_ASYNC, esp32_idf=False): cv.All(
                 cv.boolean, cv.only_with_esp_idf
             ),
@@ -312,6 +316,22 @@ async def to_code(config):
     cg.add(var.set_password(config[CONF_PASSWORD]))
     if CONF_CLIENT_ID in config:
         cg.add(var.set_client_id(config[CONF_CLIENT_ID]))
+
+    if CONF_TLS_PSK in config:
+        psk_len = int(len(config[CONF_TLS_PSK]) / 2)
+        psk = "".join(
+            [
+                f"\\x{config[CONF_TLS_PSK][i:i + 2]}"
+                for i in range(0, len(config[CONF_TLS_PSK]), 2)
+            ]
+        )
+        psk_hint_key = "static const psk_hint_key_t psk_hint_key = {"
+        psk_hint_key += f'.key = (const uint8_t *) "{psk}",'
+        psk_hint_key += f".key_size = {psk_len},"
+        psk_hint_key += f'.hint = "{config[CONF_TLS_PSK_HINT]}",'
+        psk_hint_key += "}"
+        cg.add(cg.RawExpression(psk_hint_key))
+        cg.add(var.set_tls_psk(cg.RawExpression("&psk_hint_key")))
 
     discovery = config[CONF_DISCOVERY]
     discovery_retain = config[CONF_DISCOVERY_RETAIN]

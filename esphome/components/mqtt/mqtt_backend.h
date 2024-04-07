@@ -5,6 +5,10 @@
 #include "esphome/components/network/ip_address.h"
 #include "esphome/core/helpers.h"
 
+#ifdef USE_ESP_IDF
+#include "esp_tls.h"
+#endif
+
 namespace esphome {
 namespace mqtt {
 
@@ -38,6 +42,9 @@ class MQTTBackend {
 
   virtual void set_keep_alive(uint16_t keep_alive) = 0;
   virtual void set_client_id(const char *client_id) = 0;
+#ifdef USE_ESP_IDF
+  virtual void set_tls_psk(const psk_hint_key_t *psk_hint_key) = 0;
+#endif
   virtual void set_clean_session(bool clean_session) = 0;
   virtual void set_credentials(const char *username, const char *password) = 0;
   virtual void set_will(const char *topic, uint8_t qos, bool retain, const char *payload) = 0;

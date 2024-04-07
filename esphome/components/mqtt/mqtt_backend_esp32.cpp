@@ -80,7 +80,10 @@ bool MQTTBackendESP32::initialize_() {
   if (!this->client_id_.empty()) {
     mqtt_cfg_.credentials.client_id = this->client_id_.c_str();
   }
-  if (ca_certificate_.has_value()) {
+  if (this->psk_hint_key_) {
+    mqtt_cfg_.broker.verification.psk_hint_key = this->psk_hint_key_;
+    mqtt_cfg_.broker.address.transport = MQTT_TRANSPORT_OVER_SSL;
+  } else if (ca_certificate_.has_value()) {
     mqtt_cfg_.broker.verification.certificate = ca_certificate_.value().c_str();
     mqtt_cfg_.broker.verification.skip_cert_common_name_check = skip_cert_cn_check_;
     mqtt_cfg_.broker.address.transport = MQTT_TRANSPORT_OVER_SSL;

@@ -148,6 +148,9 @@ class MQTTClientComponent : public Component {
   void set_ca_certificate(const char *cert) { this->mqtt_backend_.set_ca_certificate(cert); }
   void set_cl_certificate(const char *cert) { this->mqtt_backend_.set_cl_certificate(cert); }
   void set_cl_key(const char *key) { this->mqtt_backend_.set_cl_key(key); }
+#ifdef USE_ESP_IDF
+  void set_tls_psk(const psk_hint_key_t *psk_hint) { this->mqtt_backend_.set_tls_psk(psk_hint); }
+#endif
   void set_skip_cert_cn_check(bool skip_check) { this->mqtt_backend_.set_skip_cert_cn_check(skip_check); }
 #endif
   const Availability &get_availability();
