@@ -13,6 +13,8 @@ namespace esphome {
 namespace network {
 
 bool is_connected() {
+  return true;
+
 #ifdef USE_ETHERNET
   if (ethernet::global_eth_component != nullptr && ethernet::global_eth_component->is_connected())
     return true;
